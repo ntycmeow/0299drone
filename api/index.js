@@ -5,12 +5,13 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 const path = require("path");
 const fetch = require("node-fetch");
+const serverless = require("serverless-http");
 
 dotenv.config();
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.resolve(__dirname, "../public")));
 
 
 const corsOption = {
@@ -241,4 +242,4 @@ app.get("/env", (req, res) => {
 //   console.log(`Server is running on http://localhost:${PORT}`);
 // });
 
-module.exports = app;
+module.exports.handler = serverless(app);
