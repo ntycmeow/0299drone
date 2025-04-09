@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Logs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500&display=swap');
+    body {
+      font-family: 'Roboto Slab', serif;
+    }
+  </style>
+</head>
+<body class="bg-[#f9f9ff] bg-[url('https://www.transparenttextures.com/patterns/white-wall-3.png')] bg-repeat bg-fixed bg-blend-overlay min-h-screen flex flex-col">
+
+  <header class="bg-[#4A4F87] shadow-md">
+    <nav class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-white text-2xl font-bold tracking-wider animate-pulse">VIEW LOGS</h1>
+      <ul class="flex space-x-6">
+        <li><a href="view.html" class="text-[#F8BBD0] hover:text-white transition duration-300">VIEW CONFIG</a></li>
+        <li><a href="templog.html" class="text-[#F8BBD0] hover:text-white transition duration-300">TEMPERATURE LOG</a></li>
+        <li><a href="logs.html" class="text-[#F8BBD0] hover:text-white transition duration-300">VIEW LOGS</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center p-6">
+    <div class="w-full max-w-6xl bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-[#D58A9F]/40 transition-all duration-300 relative">
+      <h2 class="text-3xl font-bold text-[#4A4F87] mb-6 text-center"> 👀 View Logs !</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left border-collapse overflow-hidden rounded-xl">
+          <thead>
+            <tr class="bg-[#F8BBD0] text-white">
+              <th class="py-3 px-4 rounded-tl-lg">Created</th>
+              <th class="py-3 px-4">Drone ID</th>
+              <th class="py-3 px-4">Drone Name</th>
+              <th class="py-3 px-4">Country</th>
+              <th class="py-3 px-4 rounded-tr-lg">Celsius</th>
+            </tr>
+          </thead>
+          <tbody id="logTable" class="text-[#334155]">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const config = JSON.parse(localStorage.getItem("droneConfig"));
+        if (!config) {
+          alert("Drone config not found. Please visit the VIEW CONFIG page first.");
+          return;
+        }
+
+        const res = await fetch(`/logs?drone_id=${config.drone_id}`);
+        const { data } = await res.json();
+
+        const sortedData = data.sort((a, b) => new Date(b.created) - new Date(a.created)).slice(0, 25);
+
+        const tbody = document.getElementById("logTable");
+        sortedData.forEach((log, i) => {
+          const row = document.createElement('tr');
+          row.className = `hover:bg-[#ffe4ec] transition ${i % 2 === 0 ? 'bg-[#fff0f5]' : 'bg-white'}`;
+          row.innerHTML = `
+            <td class="py-2 px-4">${log.created}</td>
+            <td class="py-2 px-4">${log.drone_id}</td>
+            <td class="py-2 px-4">${log.drone_name}</td>
+            <td class="py-2 px-4">${log.country}</td>
+            <td class="py-2 px-4">${log.celsius}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error('❌ Error loading logs:', err);
+      }
+    });
+  </script>
+</body>
+</html>
